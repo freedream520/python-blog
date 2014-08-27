@@ -1,0 +1,93 @@
+{% extends "blog/base.html" %}
+{% load comments %}
+{% load staticfiles %}
+
+{% block title %}Blog {{ block.super }}{% endblock %}
+{% block extraStatic %}
+    <script type="text/javascript" src="{% static 'django_ajax/js/jquery.ajax.min.js' %}"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+    <ul class="breadcrumb col-md-10 col-md-offset-1">
+        {#        <li><a href="/">Home</a> <span class="divider">/</span></li>#}
+        <li class="active">首页</li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-2 col-md-2 pull-right col-md-pull-2">
+            <form action="{% url 'blog:blog_article_search'%}" method="post">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="搜索文章" name="keyword"
+                           required="required">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">搜索
+                    </button>
+                </span>
+                </div>
+            </form>
+            <br/>
+            <ul class="nav nav-pills nav-stacked index-sidebar">
+                <h4>目录</h4>
+                {% for tmp in categories %}
+                    <li{% if category.slug == tmp.slug %} class="active"{% endif %}><a
+                            href="{% url 'blog:blog_category_archive' slug=tmp.slug %}">{{ tmp.title }}</a></li>
+                {% endfor %}
+            </ul>
+
+            <br/>
+            <ul class="nav nav-pills nav-stacked index-sidebar" id="random-list">
+                <h4>随机文章</h4>
+            </ul>
+        </div>
+        <div class="col-md-7 col-md-offset-1" id="article">
+        {% ifequal articles "null" %}
+            <div>sorry，没有找到相关文章</div>
+        {% else %}
+            {% for item in articles %}
+                <article class="news-item">
+                    <h4 class="title"><a href="{% url 'blog:blog_article_single' slug=item.slug %}" target="_">{{ item.title }}</a>
+                    </h4>
+
+                    <div class="meta">{{ item.date_publish|date:"F j Y" }}</div>
+
+                </article>
+                <hr/>
+            {% endfor %}
+
+        {% endifequal %}
+        </div>
+        <div class="col-md-5">
+            <div class="pager" style="margin-bottom: 50px;">
+                <ul>
+                    {% comment %}
+                    {% if articles.has_previous %}
+                        <li><a href="?page={{ articles.previous_page_number }}">previous</a></li>
+                    {% else %}
+                        <li class="disabled"><a>previous</a></li>
+                    {% endif %}
+
+                    <li class="active"><span>{{ articles.number }}</span></li>
+                    {% endcomment %}
+
+                    {% if articles.has_next %}
+                        <li><a href="{{ articles.next_page_number }}"
+                               id="next" style="display: none" data-number="{{ articles.paginator.num_pages }}">
+                            next
+                        </a></li>
+                    {% else %}
+                        <li class="disabled" style="display: none"><a>next</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <button class="pull-right col-md-pull-4 col-sm-pull-0" id="go_top" title="Go Top"
+                style="cursor: pointer; border: 0px none; bottom: 80px; min-width:
+             40px; height: 40px; margin: -12px; padding: 0px; position: fixed;
+              display: none;">
+            <span><img src="/static/image/goto-top.png" alt="Go Top"/></span>
+        </button>
+    </div>
+{% endblock %}

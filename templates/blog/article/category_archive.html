@@ -1,0 +1,72 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Archive: {{ category.title }} | Blog | {{ block.super }}{% endblock %}
+
+{% block breadcrumb %}
+    <ul class="breadcrumb col-md-10 col-md-offset-1">
+        <li><a href="{% url 'blog:blog_article_index' %}">首页</a></li>
+        <li class="active">当前目录: {{ category.title }}</li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-2 col-md-2 pull-right col-md-pull-2">
+            <ul class="nav nav-pills nav-stacked">
+                {% if archive_dates|length > 0 %}
+                    <h4>日期</h4>
+                    <hr/>
+                    {% for date in archive_dates %}
+                        <li>
+                            <a href="{% url 'blog:blog_date_archive' month=date|date:"m" year=date|date:"Y" %}">{{ date|date:"M Y" }}</a>
+                        </li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+
+            <ul class="nav nav-pills nav-stacked">
+                <h4>目录</h4>
+                <hr/>
+                {% for tmp in categories %}
+                    <li{% if category.slug == tmp.slug %} class="active"{% endif %}><a
+                            href="{% url 'blog:blog_category_archive' slug=tmp.slug %}">{{ tmp.title }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-7 col-md-offset-1">
+            {% for item in articles %}
+                <article class="news-item">
+                    <h4 class="title"><a href="{% url 'blog:blog_article_single' slug=item.slug %}">{{ item.title }}</a></h4>
+
+                    <div class="meta">{{ item.date_publish|date:"F j, Y" }}</div>
+                    <div class="text">
+                        <p>{{ item.excerpt|safe }}</p>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+        <div class="col-md-5">
+            <div class="pager" style="margin-bottom: 50px;">
+                <ul>
+                    {% if articles.has_previous %}
+                        <li><a href="?page={{ articles.previous_page_number }}">previous</a></li>
+
+                    {% else %}
+                        <li class="disabled"><a>previous</a></li>
+                    {% endif %}
+                    <li><a href="?page=1">首页</a></li>
+
+                    <li class="active"><span>{{ articles.number }}</span></li>
+
+                    {% if articles.has_next %}
+                        <li><a href="?page={{ articles.paginator.num_pages }}">尾页</a></li>
+                        <li><a href="?page={{ articles.next_page_number }}">next</a></li>
+                    {% else %}
+                        <li class="disabled"><a href="?page={{ articles.paginator.num_pages }}">尾页</a></li>
+                        <li class="disabled"><a>next</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

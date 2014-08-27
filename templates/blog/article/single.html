@@ -1,0 +1,144 @@
+{% extends "blog/base.html" %}
+{% load comments %}
+{% load staticfiles %}
+
+{% block title %}{{ article.title }} | Blog | {{ block.super }}{% endblock %}
+
+{% block extraStatic %}
+    <script type="text/javascript" src="{% static 'django_ajax/js/jquery.ajax.min.js' %}"></script>
+{% endblock %}
+{% block breadcrumb %}
+    <ul class="breadcrumb col-md-offset-1 col-md-10">
+        {#        <li><a href="/">Home</a> <span class="divider">/</span></li>#}
+        <li><a href="{% url 'blog:blog_article_index' %}">主页</a></li>
+        <li class="active">{{ article.title }}</li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-2 col-md-2 pull-right col-md-pull-1">
+            {% comment %}<ul class="nav nav-pills nav-stacked">
+                {% if archive_dates|length > 0 %}
+                    <h4>日期</h4>
+                    <hr/>
+                    {% for date in archive_dates %}
+                        <li>
+                            <a href="{% url 'blog:blog_date_archive' month=date|date:"m" year=date|date:"Y" %}">{{ date|date:"M Y" }}</a>
+                        </li>
+                    {% endfor %}
+                {% endif %}
+            </ul>{% endcomment %}
+
+            {% comment %}<ul class="nav nav-pills nav-stacked  index-sidebar">
+                <h4>目录</h4>
+                {% for tmp in categories %}
+                    <li{% if category.slug == tmp.slug %} class="active"{% endif %}><a
+                            href="{% url 'blog:blog_category_archive' slug=tmp.slug %}">{{ tmp.title }}</a></li>
+                {% endfor %}
+            </ul>{% endcomment %}
+
+            <ul class="nav nav-pills nav-stacked index-sidebar" id="random-list">
+                <h4>随机文章</h4>
+            </ul>
+            <ul class="nav nav-pills nav-stacked index-sidebar" id="relate-list">
+                <h4>类似文章</h4>
+            </ul>
+        </div>
+        <div class="col-md-7 col-md-offset-1" style="line-height:30px;">
+            <h3 id="article-title">{{ article.title }}</h3>
+
+            <p class="meta">{{ article.date_publish|date:"F j, Y" }}</p>
+            <br>
+            {{ article.content_markup|safe }}
+            <hr/>
+
+            <ul class="pager">
+
+
+                {% if prev != "none" %}
+                    <li class="previous" title="{{ prev.title }}"><a
+                            href="{% url 'blog:blog_article_single' slug=prev.slug %}">&larr; 上一篇</a></li>
+                {% else %}
+                    <li class="previous disabled"><a href="javascript:;">&larr;没有了</a></li>
+                {% endif %}
+
+
+                {% if nex != "" %}
+                    <li class="next" title="{{ nex.title }}"><a
+                            href="{% url 'blog:blog_article_single' slug=nex.slug %}">下一篇 &rarr;</a></li>
+                {% else %}
+                    <li class="next disabled"><a href="javascript:;">没有啦 &rarr;</a></li>
+                {% endif %}
+            </ul>
+            <hr/>
+
+            <div id="wrap_comments">
+
+                {% get_comment_list for article as comment_list %}
+                {% get_comment_count for article as comment_count %}
+                {% if comment_count > 0 %}
+                    <h3>评论列表</h3>
+                    {% for comment in comment_list %}
+                        <blockquote>
+                            <a name="c{{ comment.id }}"></a>
+
+                            <p><a href="{% get_comment_permalink comment %}">#{{ forloop.counter }}</a>
+                                - {{ comment.comment }}</p>
+                            <small>{% if comment.url %}<a href="{{ comment.url }}" target="_blank">
+                                <i class="icon-user"></i>{{ comment.name }}</a>{% else %}<i class="icon-user"></i>
+                                {{ comment.name }}{% endif %} on <cite
+                                    title="#{{ forloop.counter }}">{{ comment.submit_date|date }}</cite></small>
+                        </blockquote>
+                    {% endfor %}
+                {% endif %}
+
+
+                <h3>添加评论</h3>
+
+                {% get_comment_form for article as form %}
+                <form action="{% comment_form_target %}" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-8">
+                            {{ form.non_field_errors }}
+                        </div>
+
+                        {{ form.content_type.as_hidden }}
+                        {{ form.object_pk.as_hidden }}
+                        {{ form.timestamp.as_hidden }}
+                        {{ form.security_hash.as_hidden }}
+                    </div>
+                    <div class="input-group col-md-12 col-sm-12" style="margin: 0 0 2px 0">
+                            <textarea name="comment" style="height: 100px;" class="form-control"
+                                      placeholder="说点什么吧……" required="required"></textarea>
+                    </div>
+                    <div class="form-horizontal">
+
+                        <input type="hidden" name="next"
+                                   value="{% url 'blog:blog_article_single' slug=article.slug %}"/>
+                        <input type="submit" name="submit" value="评论"
+                                   class="btn btn-default pull-right"/>
+
+                        <div class="input-group" style="">
+                        	<div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
+                        	<input class="form-control" type="text" name="name" required="required"
+                                       placeholder="用户名"/>
+
+                        	<div class="input-group-addon col-md-push-1" style="margin: 0 0 0 4px">@</div>
+                        	<input class="form-control" type="text" name="email"
+                                       placeholder="邮箱"/>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+        <button class="pull-right col-md-pull-4 col-sm-pull-0" id="go_top" title="Go Top"
+                style="cursor: pointer; border: 0px none; bottom: 80px; min-width:
+             40px; height: 40px; margin: -12px; padding: 0px; position: fixed;
+              display: none;">
+            <span><img src="/static/image/goto-top.png" alt="Go Top"/></span>
+        </button>
+    </div>
+{% endblock %}

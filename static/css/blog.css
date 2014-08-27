@@ -1,0 +1,27 @@
+.index-sidebar{
+    padding: 10px 15px;
+}
+
+.index-sidebar > h4{
+    padding:  10px 15px;
+    border-bottom: 2px solid rgba(224, 121, 101, 0.82);
+}
+
+.index-sidebar:after{
+    margin-bottom: 20px;
+}
+
+.index-sidebar-fix {
+    position: fixed;
+    top: 0;
+}
+
+body{
+    background: url("../image/bg.png") repeat;
+}
+
+.news-item{
+    background-color: whitesmoke;
+    border: 1px solid #ffffff;
+    padding: 15px 20px;
+}
